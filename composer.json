@@ -1,0 +1,15 @@
+{
+	"name": "wutongshenyuan/qrcode_prettify",
+    "description": "生成二维码，美化二维码",
+    "type": "library",
+    "license": "Apache-2.0",
+     
+    "require": {
+		"php": ">=7.0"
+    },
+    "autoload": {
+		"psr-4": {
+          "wutongshenyuan\\qrcode_prettify\\": "src/"
+		}
+    }
+}
