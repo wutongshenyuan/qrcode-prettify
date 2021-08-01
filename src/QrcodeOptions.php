@@ -7,7 +7,7 @@
  */
 
 namespace wutongshenyuan\qrcode_prettify;
-
+use wutongshenyuan\qrcode_prettify\Color\RGBA;
 
 class QrcodeOptions
 {
@@ -35,17 +35,21 @@ class QrcodeOptions
     // $background指黑白码中的白色
     // 如果想用渐变色 那么就传数组，传多个颜色，
     // 实现原理是用渐变色先创建一张图，再把二维码前景或背景变透明，然后与渐变图合成
-    public function setColor($foreground,$background){
-        $opt = [
-            'foreground'=>$foreground,
-            'background'=>$background
-        ];
-        $this->options['color'] = $opt;
+	// 
+    public function setForegroundColor(RGBA $foreground_color){
+         
+        $this->options['color']['foreground_color'] = $foreground_color;
     }
+	public function setBackgroundColor(RGBA $background_color){
+		$this->options['color']['background_color'] = $background_color;
+	}
+	// 此选项会导致 foreground_color、 background_color 失效
+	// 使用gif动图做前景图片会更炫
     public function setForegroundImg($foreground){
         $this->options['foreground_img'] = $foreground;
         return $this;
     }
+	// 此选项会导致 background_color 失效，不过暂时未实现
     public function setBackgroundImg($background){
         $this->options['background_img'] = $background;
         return $this;

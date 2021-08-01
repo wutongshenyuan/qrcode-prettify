@@ -7,5 +7,5 @@
  */
 namespace wutongshenyuan\qrcode_prettify\Command\I;
 interface ICommand{
-    public function execute($gd,$option);
+    public function execute($QR,$option);
 }

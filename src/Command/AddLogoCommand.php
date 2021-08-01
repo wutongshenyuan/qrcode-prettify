@@ -19,7 +19,7 @@ class AddLogoCommand extends Command
         }
         $logo = imagecreatefromstring($logoContent);
         $QR_width = imagesx($QR);//二维码图片宽度
-        $QR_height = imagesy($QR);//二维码图片高度
+        //$QR_height = imagesy($QR);//二维码图片高度
         $logo_width = imagesx($logo);//logo图片宽度
         $logo_height = imagesy($logo);//logo图片高度
         $logo_qr_width = $QR_width / 5;

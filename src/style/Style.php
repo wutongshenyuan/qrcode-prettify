@@ -8,7 +8,6 @@
 
 namespace wutongshenyuan\qrcode_prettify\Style;
 
-
 class Style
 {
 
