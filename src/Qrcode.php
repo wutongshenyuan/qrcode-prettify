@@ -22,11 +22,21 @@ class Qrcode
 		$attr = $opt->getOptions();
         require_once "phpqrcode.php";
         $errorCorrectionLevel = 'H';  //容错级别
-        $matrixPointSize = 4;// 每个点几个像素
+        $matrixPointSize = 10;
         $margin = 2; // margin的单位是点，换算成像素就是(点数*每个点的像素数)$margin*$matrixPointSize
         if(isset($attr['size']) && $attr['size']){
             $matrixPointSize = $attr['size'];
         }
+		$dot = isset($attr['dot_radius'])&&($attr['dot_radius']>0);
+		$liquid = isset($attr['liquid_radius'])&&($attr['liquid_radius']>0);
+		if($dot || $liquid){
+			// 经测试，如果想使用圆点效果，每个点至少七个像素
+			// 但为了美观，如果使用圆点效果，默认最低21
+			if(!isset($attr['size'])||$attr['size']<21){
+				$matrixPointSize = $attr['size'] = 21;
+			}
+		}
+		
         ob_start();
         \QRcode::png($str,false,$errorCorrectionLevel,$matrixPointSize,$margin);
         $imgContent = ob_get_contents();
