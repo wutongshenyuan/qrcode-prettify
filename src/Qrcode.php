@@ -20,12 +20,13 @@ class Qrcode
 		$attr = $opt->getOptions();
         require_once "phpqrcode.php";
         $errorCorrectionLevel = 'H';  //容错级别
-        $matrixPointSize = 50;      //生成图片大小
+        $matrixPointSize = 4;// 每个点几个像素
+        $margin = 2; // margin的单位是点，换算成像素就是$margin*$matrixPointSize
         if(isset($attr['size']) && $attr['size']){
             $matrixPointSize = $attr['size'];
         }
         ob_start();
-        \QRcode::png($str,false,$errorCorrectionLevel,$matrixPointSize,2);
+        \QRcode::png($str,false,$errorCorrectionLevel,$matrixPointSize,$margin);
         $imgContent = ob_get_contents();
         ob_end_clean();
 		
