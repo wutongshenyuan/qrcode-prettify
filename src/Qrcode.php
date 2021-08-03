@@ -11,6 +11,8 @@ namespace wutongshenyuan\qrcode_prettify;
 use wutongshenyuan\qrcode_prettify\Command\AddLogoCommand;
 use wutongshenyuan\qrcode_prettify\Command\ChangeColorCommand;
 use wutongshenyuan\qrcode_prettify\Command\ChangeForegroundCommand;
+use wutongshenyuan\qrcode_prettify\Command\DotCommand;
+use wutongshenyuan\qrcode_prettify\Command\LiquidCommand;
 use wutongshenyuan\qrcode_prettify\QrcodeOptions;
 
 class Qrcode
@@ -21,7 +23,7 @@ class Qrcode
         require_once "phpqrcode.php";
         $errorCorrectionLevel = 'H';  //容错级别
         $matrixPointSize = 4;// 每个点几个像素
-        $margin = 2; // margin的单位是点，换算成像素就是$margin*$matrixPointSize
+        $margin = 2; // margin的单位是点，换算成像素就是(点数*每个点的像素数)$margin*$matrixPointSize
         if(isset($attr['size']) && $attr['size']){
             $matrixPointSize = $attr['size'];
         }
@@ -37,7 +39,16 @@ class Qrcode
 		//file_put_contents($filepath,$imgContent);
         $QR = imagecreatefromstring($imgContent);
         $invoker = new Invoker();
-		
+		// 圆点处理
+        if(isset($attr['dot_radius'])){
+            $invoker->setCmd(new DotCommand());
+            $QR = $invoker->invoke($QR,$attr);
+        }
+        // 液化处理
+        if(isset($attr['liquid_radius'])){
+            $invoker->setCmd(new LiquidCommand());
+            $QR = $invoker->invoke($QR,$attr);
+        }
 		// 前景图修改二维码颜色
 		if(isset($attr['foreground_img'])){
 			if(isset($attr['color'])){
@@ -52,7 +63,7 @@ class Qrcode
             $invoker->setCmd(new ChangeColorCommand());
             $QR = $invoker->invoke($QR,['color'=>$attr['color']]);
         }
-        // logo 应该放在最后处理
+        // logo 应该放在最后处理，否则处理颜色时不太方便
         if (isset($attr['logo']) && $attr['logo']) {
             $invoker->setCmd(new AddLogoCommand());
             $QR = $invoker->invoke($QR,['logo'=>$attr['logo']]);
