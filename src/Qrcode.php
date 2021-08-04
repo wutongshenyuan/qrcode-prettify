@@ -24,6 +24,7 @@ class Qrcode
         $errorCorrectionLevel = 'H';  //容错级别
         $matrixPointSize = 10;
         $margin = 2; // margin的单位是点，换算成像素就是(点数*每个点的像素数)$margin*$matrixPointSize
+        $attr['margin'] = $margin;
         if(isset($attr['size']) && $attr['size']){
             $matrixPointSize = $attr['size'];
         }

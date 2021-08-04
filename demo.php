@@ -30,6 +30,7 @@ $opt = new QrcodeOptions();
 //$opt->setBackgroundColor(new RGBA(255,255,0));
 //$opt->setForegroundImg(Foreground::FOREGROUND_IMG_BEAUTY);
 //$opt->setLogo('');
-$opt->setDotRadius(10);
+//$opt->setDotRadius(10);
+$opt->setLiquidRadius(10);
 Qrcode::make('https://www.baidu.com',$opt);
 echo time();
