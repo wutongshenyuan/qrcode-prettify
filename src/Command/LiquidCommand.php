@@ -14,6 +14,7 @@ class LiquidCommand extends Command
     // 液化效果
     public function execute($QR, $option)
     {
+
         return $QR;
     }
 }

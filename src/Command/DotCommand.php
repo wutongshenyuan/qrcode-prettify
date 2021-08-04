@@ -47,6 +47,7 @@ class DotCommand extends Command
 	   imagefill($img,$center,$center,$black);
 	   // 基本图案生成完毕，下面开始逐点替换
 	    /*resource $dst_im,resource $src_im,int $dst_x,int $dst_y,int $src_x,int $src_y,int $src_w,int $src_h,int $pct*/
+	  /*
 	   $qrwidth = imagesx($QR);
 	   $pointNum = $qrwidth/$size;
 	   for($i=0;$i<$pointNum;$i++){
@@ -61,7 +62,35 @@ class DotCommand extends Command
 			  }
 		  }
 	   }
+	  */
+	   // 更高效的做法，应该是先生成一张布满圆点的图，
+        //然后把$QR黑色部分调成透明，再把两张图合并
+        $qrwidth = imagesx($QR);
+        $dst_img = imagecreatetruecolor($qrwidth, $qrwidth);
+        $pointNum = $qrwidth/$size;
+        for($i=0;$i<$pointNum;$i++){
+            $start_x = $size*$i;
+            for($j=0;$j<$pointNum;$j++){
+                $start_y = $size*$j;
+                imagecopymerge($dst_img,$img,$start_x,$start_y,0,0,$size,$size,100);
+            }
+        }
+        //将$QR黑色背景转为透明
+        if(!imageistruecolor($QR)){
+            imagepalettetotruecolor($QR);
+        }
+        imagecolortransparent(
+            $QR,
+            imagecolorallocate(
+                $QR,
+                0,
+                0,
+                0
+            ));
+        imagecopymerge($dst_img,$QR,0,0,0,0,$qrwidth,$qrwidth,100);
 	   imagedestroy($img);
+	   imagedestroy($QR);
+        $QR = $dst_img;
        return $QR;
     }
 }
