@@ -59,4 +59,16 @@ class LiquidCommand extends Command
 
         return $QR;
     }
+	private function getBaseImg($matrix,$x,$y){
+		// 把图片圆角的位置编号 
+		// 1-----2
+		// |     |
+		// |     |
+		// 8-----4
+		// 定位区域不处理 或者分块处理
+		if($x<=9&&$y<=9){
+			return -1;// 不替换
+		}
+		
+	}
 }
