@@ -11,7 +11,12 @@ namespace wutongshenyuan\qrcode_prettify\Command;
 
 class LiquidCommand extends Command
 {
+    const LEFT_TOP = 1;
+    const RIGHT_TOP = 2;
+    const RIGHT_BOTTOM = 4;
+    const LEFT_BOTTOM = 8;
 	private $baseImgs=[];
+	private $option = [];
     // 液化效果
     // 实现思路，可通过size，margin参数定位二维码的每一个点
     // 遍历每一个点（注意不是像素）根据其黑白交替情况，用带圆角的图片替换
@@ -20,6 +25,7 @@ class LiquidCommand extends Command
     // 以上五中基本图形分黑白两种颜色，就是十种，这还忽略了图片的方向
     public function execute($QR, $option)
     {
+        $this->option = $option;
         $size = $option['size'];
         $margin = $option['margin'];
         $qrWidth = imagesx($QR);
@@ -56,19 +62,115 @@ class LiquidCommand extends Command
 			//echo "\r\n";
         }
 		// 通过计算矩阵中某个点的相邻点情况，决定其液化后用什么图案代替
-
+        for($i=0;$i<$pointNum;$i++){
+            $start_y = $size*$i;
+            for($j=0;$j<$pointNum;$j++){
+                $start_x = $size*$j;
+                $baseImg = $this->getBaseImg($matrix,$j,$i,$margin,$pointNum);
+                if($baseImg){
+                    imagecopymerge($QR,$baseImg,$start_x,$start_y,0,0,$size,$size,100);
+                }
+            }
+        }
+        // 释放资源
+        if($this->baseImgs){
+            foreach ($this->baseImgs as $k=>$v){
+                foreach ($v as $kk=>$vv){
+                    imagedestroy($vv);
+                }
+            }
+        }
         return $QR;
     }
-	private function getBaseImg($matrix,$x,$y){
-		// 把图片圆角的位置编号 
-		// 1-----2
-		// |     |
-		// |     |
-		// 8-----4
-		// 定位区域不处理 或者分块处理
-		if($x<=9&&$y<=9){
-			return -1;// 不替换
-		}
-		
+    private function getBaseImg($matrix,$x,$y,$margin,$pointNum){
+        //把图片圆角的位置编号,
+        //每两个相邻边与当前色块不一样颜色的，
+        //该角就需要圆角处理
+        // 1-----2
+        // |     |
+        // 8-----4
+        // 判断二维码三个角的定位区域不处理 ，或者也可以分块遍历
+        $ignorePointNum = $margin+8;
+        $left = $ignorePointNum-1;// 从0开始所以需要减1
+        $right = $pointNum-$ignorePointNum-1;
+        $top = $ignorePointNum-1;
+        $bottom = $pointNum-$ignorePointNum-1;
+
+        if($x<=$left&&$y<=$top){
+            return false;// 不替换
+        }
+        if($x>=$right&&$y<=$top){
+            return false;// 不替换
+        }
+        if($x<=$left&&$y>=$bottom){
+            return false;// 不替换
+        }
+        // 忽略margin
+        if($x<=($margin-1)||$x>=($pointNum-$margin) || $y<=($margin-1) || $y>=($pointNum-$margin)){
+            return false;// 不替换
+        }
+        $curPoint = $matrix[$x][$y];
+        $top = isset($matrix[$x][$y-1])?$matrix[$x][$y-1]:!$curPoint;
+        $right = isset($matrix[$x+1][$y])?$matrix[$x+1][$y]:!$curPoint;
+        $bottom = isset($matrix[$x][$y+1])?$matrix[$x][$y+1]:!$curPoint;
+        $left = isset($matrix[$x-1][$y])?$matrix[$x-1][$y]:!$curPoint;
+        $baseImgNum = 0;
+        if($left==$top && $left!=$curPoint){
+            $baseImgNum +=self::LEFT_TOP;
+        }
+        if($top==$right && $top!=$curPoint){
+            $baseImgNum +=self::RIGHT_TOP;
+        }
+        if($right==$bottom && $right!=$curPoint){
+            $baseImgNum +=self::RIGHT_BOTTOM;
+        }
+        if($bottom==$left && $bottom!=$curPoint){
+            $baseImgNum +=self::LEFT_BOTTOM;
+        }
+        //echo $baseImgNum."\t";
+        if(!$baseImgNum){
+            return false;
+        }
+        return $this->makeBaseImg($curPoint,$baseImgNum);
+    }
+	private function makeBaseImg($curPointColor,$baseImgNum){
+        if(isset($this->baseImgs[$curPointColor]) && isset($this->baseImgs[$curPointColor][$baseImgNum])){
+            return $this->baseImgs[$curPointColor][$baseImgNum];
+        }
+        $size = $this->option['size'];
+        // 外面约定dot_radius传入1-10意思是十分之几，所以这里有个*0.1的过程
+        $radius = $size/2*0.1*$this->option['liquid_radius'];
+        $w = $radius*2;
+        $baseImg = imagecreate($size,$size);
+        if($curPointColor==0){
+            $foregroundColor = imagecolorallocate($baseImg,255,255,255);
+            $backgroundColor = imagecolorallocate($baseImg,0,0,0);
+        }else{
+            $foregroundColor = imagecolorallocate($baseImg,0,0,0);
+            $backgroundColor = imagecolorallocate($baseImg,255,255,255);
+        }
+        imagefill($baseImg,0,0,$backgroundColor);
+
+        if($baseImgNum&self::LEFT_TOP){
+            // 左上角
+            imagearc($baseImg,$radius,$radius,$w,$w,180,270,$foregroundColor);
+        }
+        if($baseImgNum&self::RIGHT_TOP){
+            // 右上角
+            imagearc($baseImg,$size-$radius,$radius,$w,$w,-90,0,$foregroundColor);
+        }
+        if($baseImgNum&self::RIGHT_BOTTOM){
+            // 右下角
+            imagearc($baseImg,$size-$radius,$size-$radius,$w,$w,0,90,$foregroundColor);
+        }
+        if($baseImgNum&self::LEFT_BOTTOM){
+            // 左下角
+            imagearc($baseImg,$radius,$size-$radius,$w,$w,90,180,$foregroundColor);
+        }
+        $center = ceil($size/2);
+        imagefill($baseImg,$center,$center,$foregroundColor);
+        $this->baseImgs[$curPointColor][$baseImgNum] = $baseImg;
+        imagepng($baseImg,__DIR__.'/../temp/'.time().'.png');
+        return $baseImg;
 	}
 }
