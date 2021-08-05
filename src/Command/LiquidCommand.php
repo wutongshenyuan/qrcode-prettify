@@ -86,6 +86,12 @@ class LiquidCommand extends Command
                 }
             }
         }
+		// 修改码眼
+		$codeEye = $this->getCodeEye();
+		imagecopymerge($QR,$codeEye,$size*$margin,$size*$margin,0,0,$size*7,$size*7,100);
+		imagecopymerge($QR,$codeEye,$qrWidth-($size*(7+$margin)),$size*$margin,0,0,$size*7,$size*7,100);
+		imagecopymerge($QR,$codeEye,$size*$margin,$qrWidth-($size*(7+$margin)),0,0,$size*7,$size*7,100);
+		imagedestroy($codeEye);
         return $QR;
     }
     private function getBaseImg($matrix,$row,$col,$margin,$pointNum){
@@ -211,18 +217,31 @@ class LiquidCommand extends Command
 		$codeEye = imagecreate($w,$w);
 		$black = imagecolorallocate($codeEye,0,0,0);
 		$white = imagecolorallocate($codeEye,255,255,255);
-		imagefill($codeEye,0,0,$white)
+		imagefill($codeEye,0,0,$white);
 		
 		// 左上角
-		imagearc($codeEye,$radius,$radius,$size,$size,180,270,$foregroundColor);
+		imagearc($codeEye,$radius,$radius,$size,$size,180,270,$black);
 		// 右上角
-		imagearc($codeEye,$size-$radius,$radius,$size,$size,-90,0,$foregroundColor);
+		imagearc($codeEye,$w-$radius,$radius,$size,$size,-90,0,$black);
 		// 右下角
-		imagearc($codeEye,$size-$radius,$size-$radius,$size,$size,0,90,$foregroundColor);
+		imagearc($codeEye,$w-$radius,$w-$radius,$size,$size,0,90,$black);
 		// 左下角
-		imagearc($codeEye,$radius,$size-$radius,$size,$size,90,180,$foregroundColor);
-        imagefill($codeEye,0,0,$black);
-		// 画矩形 再画圆角 再填充
+		imagearc($codeEye,$radius,$w-$radius,$size,$size,90,180,$black);
+        imagefill($codeEye,$w/2,$w/2,$black);
 		
+		// 画矩形 再画圆角 再填充白色
+		imagerectangle($codeEye,$size,$size,$w-$size,$w-$size,$white);
+		// 左上角
+		imagearc($codeEye,$radius+$size,$radius+$size,$size,$size,180,270,$white);
+		// 右上角
+		imagearc($codeEye,$w-($radius+$size),$radius+$size,$size,$size,-90,0,$white);
+		// 右下角
+		imagearc($codeEye,$w-($radius+$size),$w-($radius+$size),$size,$size,0,90,$white);
+		// 左下角
+		imagearc($codeEye,$radius+$size,$w-($radius+$size),$size,$size,90,180,$white);
+        imagefill($codeEye,$w/2,$w/2,$white);
+		// 画椭圆
+		imagefilledellipse($codeEye,$w/2,$w/2,$size*3,$size*3,$black);
+		return $codeEye;
 	}
 }
