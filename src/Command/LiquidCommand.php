@@ -57,24 +57,24 @@ class LiquidCommand extends Command
 				}else{
 					$matrix[$i][$j]=1;
 				}
-				echo $matrix[$i][$j]." ";
+				//echo $matrix[$i][$j]." ";
             }
-			echo "\r\n";
+			//echo "\r\n";
         }
 		// 通过计算矩阵中某个点的相邻点情况，决定其液化后用什么图案代替
-        $baseNum=0;
+        //$baseNum=0;
         for($i=0;$i<$pointNum;$i++){
             $start_y = $size*$i;
             for($j=0;$j<$pointNum;$j++){
                 $start_x = $size*$j;
                 $baseImg = $this->getBaseImg($matrix,$i,$j,$margin,$pointNum);
                 if($baseImg){
-                    $baseNum++;
+                    //$baseNum++;
                     imagecopymerge($QR,$baseImg,$start_x,$start_y,0,0,$size,$size,100);
-                    if($baseNum==2){
-                        echo $i.'--'.$j."\r\n";
-                        break 2;
-                    }
+                    //if($baseNum==2){
+                    //    echo $i.'--'.$j."\r\n";
+                    //    break 2;
+                    //}
                 }
             }
         }
@@ -92,17 +92,17 @@ class LiquidCommand extends Command
         $x = $col;
         $y = $row;
         //把图片圆角的位置编号,
-        //每两个相邻边与当前色块不一样颜色的，
-        //该角就需要圆角处理
+        // 白色收缩方案 两条边对应颜色不一致则收缩
+        // 黑色收缩方案 两条边对应颜色不一致，顶点对应颜色也不一致则收缩
         // 1-----2
         // |     |
         // 8-----4
         // 判断二维码三个角的定位区域不处理 ，或者也可以分块遍历
         $ignorePointNum = $margin+8;
         $left = $ignorePointNum-1;// 从0开始所以需要减1
-        $right = $pointNum-$ignorePointNum-1;
+        $right = $pointNum-$ignorePointNum;
         $top = $ignorePointNum-1;
-        $bottom = $pointNum-$ignorePointNum-1;
+        $bottom = $pointNum-$ignorePointNum;
 
         if($x<=$left&&$y<=$top){
             return false;// 不替换
@@ -117,29 +117,18 @@ class LiquidCommand extends Command
         if($x<=($margin-1)||$x>=($pointNum-$margin) || $y<=($margin-1) || $y>=($pointNum-$margin)){
             return false;// 不替换
         }
-        // 白色收缩方案 两条边对应颜色不一致则收缩
-        // 黑色收缩方案 两条边对应颜色不一致，顶点对应颜色也不一致则收缩
+        
         // x表示列 y表示行
         $curPoint = $matrix[$y][$x];
-        $top = isset($matrix[$y][$x-1])?$matrix[$y][$x-1]:(int)!$curPoint;
-        $right = isset($matrix[$y+1][$x])?$matrix[$y+1][$x]:(int)!$curPoint;
-        $bottom = isset($matrix[$y][$x+1])?$matrix[$y][$x+1]:(int)!$curPoint;
-        $left = isset($matrix[$y-1][$x])?$matrix[$y-1][$x]:(int)!$curPoint;
+        $top = isset($matrix[$y-1][$x])?$matrix[$y-1][$x]:(int)!$curPoint;
+        $right = isset($matrix[$y][$x+1])?$matrix[$y][$x+1]:(int)!$curPoint;
+        $bottom = isset($matrix[$y+1][$x])?$matrix[$y+1][$x]:(int)!$curPoint;
+        $left = isset($matrix[$y][$x-1])?$matrix[$y][$x-1]:(int)!$curPoint;
         $leftTop = isset($matrix[$y-1][$x-1])?$matrix[$y-1][$x-1]:(int)!$curPoint;
-        $rightTop = isset($matrix[$y+1][$x-1])?$matrix[$y+1][$x-1]:(int)!$curPoint;
+        $rightTop = isset($matrix[$y-1][$x+1])?$matrix[$y-1][$x+1]:(int)!$curPoint;
         $rightBottom = isset($matrix[$y+1][$x+1])?$matrix[$y+1][$x+1]:(int)!$curPoint;
-        $leftBottom = isset($matrix[$y-1][$x+1])?$matrix[$y-1][$x+1]:(int)!$curPoint;
-        if($y==2 && $x==14){
-            echo '$curPoint:'.$curPoint."\r\n";
-            echo '$top:'.$top."\r\n";
-            echo '$right:'.$right."\r\n";
-            echo '$bottom:'.$bottom."\r\n";
-            echo '$left:'.$left."\r\n";
-            echo '$leftTop:'.$leftTop."\r\n";
-            echo '$rightTop:'.$rightTop."\r\n";
-            echo '$rightBottom:'.$rightBottom."\r\n";
-            echo '$leftBottom:'.$leftBottom."\r\n";
-        }
+        $leftBottom = isset($matrix[$y+1][$x-1])?$matrix[$y+1][$x-1]:(int)!$curPoint;
+        
         $baseImgNum = 0;
         if($curPoint==0){//白色收缩方案
             if($left==$top && $left!=$curPoint){
@@ -212,7 +201,28 @@ class LiquidCommand extends Command
         $center = ceil($size/2);
         imagefill($baseImg,$center,$center,$foregroundColor);
         $this->baseImgs[$curPointColor][$baseImgNum] = $baseImg;
-        imagepng($baseImg,__DIR__.'/../temp/'.time().rand(1000,9999).'.png');
+        //imagepng($baseImg,__DIR__.'/../temp/'.time().rand(1000,9999).'.png');
         return $baseImg;
+	}
+	private function getCodeEye(){
+		$size = $this->option['size'];
+		$radius = $size/2;
+		$w = $size*7;
+		$codeEye = imagecreate($w,$w);
+		$black = imagecolorallocate($codeEye,0,0,0);
+		$white = imagecolorallocate($codeEye,255,255,255);
+		imagefill($codeEye,0,0,$white)
+		
+		// 左上角
+		imagearc($codeEye,$radius,$radius,$size,$size,180,270,$foregroundColor);
+		// 右上角
+		imagearc($codeEye,$size-$radius,$radius,$size,$size,-90,0,$foregroundColor);
+		// 右下角
+		imagearc($codeEye,$size-$radius,$size-$radius,$size,$size,0,90,$foregroundColor);
+		// 左下角
+		imagearc($codeEye,$radius,$size-$radius,$size,$size,90,180,$foregroundColor);
+        imagefill($codeEye,0,0,$black);
+		// 画矩形 再画圆角 再填充
+		
 	}
 }

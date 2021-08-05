@@ -42,8 +42,7 @@ class Qrcode
         \QRcode::png($str,false,$errorCorrectionLevel,$matrixPointSize,$margin);
         $imgContent = ob_get_contents();
         ob_end_clean();
-
-        $imgContent = file_get_contents(__DIR__.'/temp/origin.png');
+		 
         if(!$attr){
             return base64_encode($imgContent);
         }
