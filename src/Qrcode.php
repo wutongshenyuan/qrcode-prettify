@@ -82,8 +82,8 @@ class Qrcode
         }
         imagepng($QR, $filepath);
 		imagedestroy($QR);
-        $base64Img = base64_encode(file_get_contents($path));
-        @unlink($path);
+        $base64Img = base64_encode(file_get_contents($filepath));
+        @unlink($filepath);
         return $base64Img;
     }
 	private static function getFilePath(){
