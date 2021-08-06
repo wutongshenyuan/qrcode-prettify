@@ -211,37 +211,55 @@ class LiquidCommand extends Command
         return $baseImg;
 	}
 	private function getCodeEye(){
+        // 思路 生成外轮廓图画圆角 再生成一内轮廓图 画圆角 合并两张图 然后中间画圆
+        /*
+          ------------
+         |  --------  |
+         | |  ○○  | |
+         | |  ○○  | |
+         |  --------  |
+          ------------
+        */
 		$size = $this->option['size'];
-		$radius = $size/2;
+		$radius = $size;
+		$dot_width = $radius*2;
 		$w = $size*7;
 		$codeEye = imagecreate($w,$w);
 		$black = imagecolorallocate($codeEye,0,0,0);
 		$white = imagecolorallocate($codeEye,255,255,255);
 		imagefill($codeEye,0,0,$white);
-		
 		// 左上角
-		imagearc($codeEye,$radius,$radius,$size,$size,180,270,$black);
+		imagearc($codeEye,$radius,$radius,$dot_width,$dot_width,180,270,$black);
 		// 右上角
-		imagearc($codeEye,$w-$radius,$radius,$size,$size,-90,0,$black);
+		imagearc($codeEye,$w-$radius,$radius,$dot_width,$dot_width,-90,0,$black);
 		// 右下角
-		imagearc($codeEye,$w-$radius,$w-$radius,$size,$size,0,90,$black);
+		imagearc($codeEye,$w-$radius,$w-$radius,$dot_width,$dot_width,0,90,$black);
 		// 左下角
-		imagearc($codeEye,$radius,$w-$radius,$size,$size,90,180,$black);
+		imagearc($codeEye,$radius,$w-$radius,$dot_width,$dot_width,90,180,$black);
         imagefill($codeEye,$w/2,$w/2,$black);
-		
-		// 画矩形 再画圆角 再填充白色
-		imagerectangle($codeEye,$size,$size,$w-$size,$w-$size,$white);
+
+        // 生成内轮廓图
+        $w_inner = $w-($size*2);
+        $codeEyeInnerRect = imagecreate($w_inner,$w_inner);
+        $black = imagecolorallocate($codeEyeInnerRect,0,0,0);
+        $white = imagecolorallocate($codeEyeInnerRect,255,255,255);
+        imagefill($codeEyeInnerRect,0,0,$black);
 		// 左上角
-		imagearc($codeEye,$radius+$size,$radius+$size,$size,$size,180,270,$white);
+		imagearc($codeEyeInnerRect,$radius,$radius,$dot_width,$dot_width,180,270,$white);
 		// 右上角
-		imagearc($codeEye,$w-($radius+$size),$radius+$size,$size,$size,-90,0,$white);
+		imagearc($codeEyeInnerRect,$w_inner-$radius,$radius,$dot_width,$dot_width,-90,0,$white);
 		// 右下角
-		imagearc($codeEye,$w-($radius+$size),$w-($radius+$size),$size,$size,0,90,$white);
+		imagearc($codeEyeInnerRect,$w_inner-$radius,$w_inner-$radius,$dot_width,$dot_width,0,90,$white);
 		// 左下角
-		imagearc($codeEye,$radius+$size,$w-($radius+$size),$size,$size,90,180,$white);
-        imagefill($codeEye,$w/2,$w/2,$white);
+		imagearc($codeEyeInnerRect,$radius,$w_inner-$radius,$dot_width,$dot_width,90,180,$white);
+		//imagefill($codeEyeInnerRect,$w_inner/2,$w_inner/2,$white);
+        imagefilltoborder($codeEyeInnerRect,$w_inner/2,$w_inner/2,$white,$white);
+        //imagepng($codeEyeInnerRect,__DIR__.'/../temp/innerrect.png');
+        // 两张图合成
+        imagecopymerge($codeEye,$codeEyeInnerRect,$size,$size,0,0,$w_inner,$w_inner,100);
 		// 画椭圆
 		imagefilledellipse($codeEye,$w/2,$w/2,$size*3,$size*3,$black);
+		imagedestroy($codeEyeInnerRect);
 		return $codeEye;
 	}
 }
