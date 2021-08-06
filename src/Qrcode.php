@@ -82,9 +82,9 @@ class Qrcode
         }
         imagepng($QR, $filepath);
 		imagedestroy($QR);
-        //$base64Img = base64_encode(file_get_contents($path));
-        //@unlink($path);
-        //return $base64Img;
+        $base64Img = base64_encode(file_get_contents($path));
+        @unlink($path);
+        return $base64Img;
     }
 	private static function getFilePath(){
 		$baseDir = __DIR__.'/temp/';
