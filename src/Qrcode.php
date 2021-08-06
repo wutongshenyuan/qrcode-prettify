@@ -23,7 +23,9 @@ class Qrcode
         require_once "phpqrcode.php";
         $errorCorrectionLevel = 'H';  //容错级别
         $matrixPointSize = 10;
-        $margin = 2; // margin的单位是点，换算成像素就是(点数*每个点的像素数)$margin*$matrixPointSize
+        $dotOrLiquidMinPointSize = 21;// 圆点或液化效果最低size值
+        // margin至少为1 因为在margin为0时，液化效果对边缘没做兼容
+        $margin = 1; // margin的单位是点，换算成像素就是(点数*每个点的像素数)$margin*$matrixPointSize
         $attr['margin'] = $margin;
         if(isset($attr['size']) && $attr['size']){
             $matrixPointSize = $attr['size'];
@@ -33,11 +35,10 @@ class Qrcode
 		if($dot || $liquid){
 			// 经测试，如果想使用圆点效果，每个点至少七个像素
 			// 但为了美观，如果使用圆点效果，默认最低21
-			if(!isset($attr['size'])||$attr['size']<21){
-				$matrixPointSize = $attr['size'] = 21;
+			if(!isset($attr['size'])||$attr['size']<$dotOrLiquidMinPointSize){
+				$matrixPointSize = $attr['size'] = $dotOrLiquidMinPointSize;
 			}
 		}
-		
         ob_start();
         \QRcode::png($str,false,$errorCorrectionLevel,$matrixPointSize,$margin);
         $imgContent = ob_get_contents();
