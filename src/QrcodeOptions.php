@@ -21,6 +21,14 @@ class QrcodeOptions
     const RADIUS_LEVEL_8 = 8;
     const RADIUS_LEVEL_9 = 9;
     const RADIUS_LEVEL_10 = 10;
+
+    const GRADIEN_DIR_VERTICAL=1;//从上到下渐变
+    const GRADIEN_DIR_HORIZONTAL=2;//从左到右渐变
+    const GRADIEN_DIR_ELLIPSE=3;//椭圆渐变
+    const GRADIEN_DIR_CIRCLE=4;//圆形渐变
+    const GRADIEN_DIR_RECTANGLE=5;//矩形渐变
+    const GRADIEN_DIR_DIAMOND=6;//菱形渐变
+
     private $options = [];
     public function setLogo($logoUrl){
         $this->options['logo'] = $logoUrl;
@@ -48,12 +56,30 @@ class QrcodeOptions
     // 实现原理是用渐变色先创建一张图，再把二维码前景或背景变透明，然后与渐变图合成
 	// 
     public function setForegroundColor(RGBA $foreground_color){
-         
         $this->options['color']['foreground_color'] = $foreground_color;
+        return $this;
     }
 	public function setBackgroundColor(RGBA $background_color){
 		$this->options['color']['background_color'] = $background_color;
+        return $this;
 	}
+	public function setGradientForegroundColor(RGBA $begin_color,RGBA $end_color,$direction){
+        $this->options['color']['foreground_color'] = [
+            'begin_color'=>$begin_color,
+            'end_color'=>$end_color,
+            'direction'=>$direction
+        ];
+        return $this;
+    }
+    // 修改背景色需求少，先不实现了
+//    public function setGradientBackgroundColor(RGBA $begin_color,RGBA $end_color,$direction){
+//        $this->options['color']['background_color'] = [
+//            'begin_color'=>$begin_color,
+//            'end_color'=>$end_color,
+//            'direction'=>$direction
+//        ];
+//        return $this;
+//    }
 	// 此选项会导致 foreground_color、 background_color 失效
 	// 使用gif动图做前景图片会更炫
     public function setForegroundImg($foreground){
