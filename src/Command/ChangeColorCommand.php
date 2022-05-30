@@ -166,16 +166,17 @@ class ChangeColorCommand extends Command
         $img_width = $img_height*2;
         $begin_color = $color['begin_color'];
         $end_color = $color['end_color'];
-        // 颜色变化步长取相反数
-        $rStep = 0-($begin_color->getR()-$end_color->getR())/$img_height;
-        $gStep = 0-($begin_color->getG()-$end_color->getG())/$img_height;
-        $bStep = 0-($begin_color->getB()-$end_color->getB())/$img_height;
+        // 颜色变化步长取相反数 *2 是因为在半径的范围内就需要完成渐变
+        $rStep = 0-($begin_color->getR()-$end_color->getR())/$img_width*2;
+        $gStep = 0-($begin_color->getG()-$end_color->getG())/$img_width*2;
+        $bStep = 0-($begin_color->getB()-$end_color->getB())/$img_width*2;
         $cx = $img_height/2;
         $cy = $cx;
         // 创建一张新真彩图
         $resImage = imagecreatetruecolor($img_height, $img_height);
         $half = intval($img_width/2);
-        for($i=$half;$i>=1;$i--){
+
+        for($i=$half;$i>=1;$i-=2){
             $fillcolor = imagecolorallocate(
                 $resImage,
                 $this->getColor($begin_color->getR(),$i,$rStep),
@@ -185,6 +186,7 @@ class ChangeColorCommand extends Command
             $width = $i*2;
             $height = $width/2;
             imagefilledellipse($resImage,$cx,$cy,$width,$height,$fillcolor);
+
         }
         $filePath = Qrcode::getFilePath();
         imagepng($resImage,$filePath);
