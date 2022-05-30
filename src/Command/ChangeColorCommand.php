@@ -8,6 +8,8 @@
 
 namespace wutongshenyuan\qrcode_prettify\Command;
 
+use wutongshenyuan\qrcode_prettify\Qrcode;
+
 class ChangeColorCommand extends Command
 {
     public function execute($QR, $option)
@@ -29,7 +31,9 @@ class ChangeColorCommand extends Command
                     && isset($foreground_color['direction'])){
                     $fun = "gradien".ucfirst($foreground_color['direction']);
                     if(method_exists($this,$fun)){
-                        $this->{$fun};
+                        $filepath = $this->$fun($foreground_color,imagesy($QR));
+                        $changeFg = new ChangeForegroundCommand();
+                        return $changeFg->execute($QR,['foreground_img'=>$filepath]);
                     }
                 }
             }else{
@@ -106,7 +110,9 @@ class ChangeColorCommand extends Command
 
 		return $QR;
     }
+    // 垂直渐变
     private function gradienVertical($color,$img_height){
+
         $img_width = $img_height;
         $begin_color = $color['begin_color'];
         $end_color = $color['end_color'];
@@ -115,7 +121,7 @@ class ChangeColorCommand extends Command
         $gStep = 0-($begin_color->getG()-$end_color->getG())/$img_height;
         $bStep = 0-($begin_color->getB()-$end_color->getB())/$img_height;
         // 创建一张新真彩图
-        $resImage = imagecreatetruecolor ($img_height, $img_height);
+        $resImage = imagecreatetruecolor($img_width, $img_height);
         for($i=1;$i<=$img_height;$i++){
             $fillcolor = imagecolorallocate(
                 $resImage,
@@ -124,10 +130,77 @@ class ChangeColorCommand extends Command
                 $this->getColor($begin_color->getB(),$i,$bStep)
             );
             $x1 = 0;$y1 = $i-1;$x2 = $img_width;$y = $i+1;
-            imagefilledrectangle($x1,$y1,$x2,$y,$fillcolor);
+            imagefilledrectangle($resImage,$x1,$y1,$x2,$y,$fillcolor);
         }
-        imagepng($resImage,__DIR__."/temp.png");
-        exit;
+        $filePath = Qrcode::getFilePath();
+        imagepng($resImage,$filePath);
+        return $filePath;
+    }
+    // 水平渐变
+    private function gradienHorizontal($color,$img_width){
+        $img_height = $img_width;
+        $begin_color = $color['begin_color'];
+        $end_color = $color['end_color'];
+        // 颜色变化步长取相反数
+        $rStep = 0-($begin_color->getR()-$end_color->getR())/$img_width;
+        $gStep = 0-($begin_color->getG()-$end_color->getG())/$img_width;
+        $bStep = 0-($begin_color->getB()-$end_color->getB())/$img_width;
+        // 创建一张新真彩图
+        $resImage = imagecreatetruecolor($img_width, $img_height);
+        for($i=1;$i<=$img_width;$i++){
+            $fillcolor = imagecolorallocate(
+                $resImage,
+                $this->getColor($begin_color->getR(),$i,$rStep),
+                $this->getColor($begin_color->getG(),$i,$gStep),
+                $this->getColor($begin_color->getB(),$i,$bStep)
+            );
+            $x1 = $i-1;$y1 = 0;$x2 = $i+1;$y = $img_height;
+            imagefilledrectangle($resImage,$x1,$y1,$x2,$y,$fillcolor);
+        }
+        $filePath = Qrcode::getFilePath();
+        imagepng($resImage,$filePath);
+        return $filePath;
+    }
+    // 椭圆渐变  效率低 待优化
+    private function gradienEllipse($color,$img_height){
+        $img_width = $img_height*2;
+        $begin_color = $color['begin_color'];
+        $end_color = $color['end_color'];
+        // 颜色变化步长取相反数
+        $rStep = 0-($begin_color->getR()-$end_color->getR())/$img_height;
+        $gStep = 0-($begin_color->getG()-$end_color->getG())/$img_height;
+        $bStep = 0-($begin_color->getB()-$end_color->getB())/$img_height;
+        $cx = $img_height/2;
+        $cy = $cx;
+        // 创建一张新真彩图
+        $resImage = imagecreatetruecolor($img_height, $img_height);
+        $half = intval($img_width/2);
+        for($i=$half;$i>=1;$i--){
+            $fillcolor = imagecolorallocate(
+                $resImage,
+                $this->getColor($begin_color->getR(),$i,$rStep),
+                $this->getColor($begin_color->getG(),$i,$gStep),
+                $this->getColor($begin_color->getB(),$i,$bStep)
+            );
+            $width = $i*2;
+            $height = $width/2;
+            imagefilledellipse($resImage,$cx,$cy,$width,$height,$fillcolor);
+        }
+        $filePath = Qrcode::getFilePath();
+        imagepng($resImage,$filePath);
+        return $filePath;
+    }
+    //圆形渐变
+    private function gradienCircle($color,$img_width){
+
+    }
+    //矩形渐变
+    private function gradienRectangle($color,$img_width){
+
+    }
+    //菱形渐变
+    private function gradienDiamond($color,$img_width){
+
     }
     private function getColor($begin,$round,$step){
         // 四舍五入

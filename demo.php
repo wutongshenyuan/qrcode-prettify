@@ -19,5 +19,5 @@ use wutongshenyuan\qrcode_prettify\Foreground\Foreground;
 //渐变色
 $opt = new QrcodeOptions();
 $opt->setSize(81);
-$opt->setGradientForegroundColor(new RGBA(0,0,0,0),new RGBA(255,255,255,0),QrcodeOptions::GRADIEN_DIR_VERTICAL);
+$opt->setGradientForegroundColor(new RGBA(247, 17, 5,0),new RGBA(3, 142, 234,0),QrcodeOptions::GRADIEN_DIR_ELLIPSE);
 Qrcode::make('https://www.baidu.com',$opt);

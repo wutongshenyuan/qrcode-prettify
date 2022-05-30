@@ -22,12 +22,12 @@ class QrcodeOptions
     const RADIUS_LEVEL_9 = 9;
     const RADIUS_LEVEL_10 = 10;
 
-    const GRADIEN_DIR_VERTICAL=1;//从上到下渐变
-    const GRADIEN_DIR_HORIZONTAL=2;//从左到右渐变
-    const GRADIEN_DIR_ELLIPSE=3;//椭圆渐变
-    const GRADIEN_DIR_CIRCLE=4;//圆形渐变
-    const GRADIEN_DIR_RECTANGLE=5;//矩形渐变
-    const GRADIEN_DIR_DIAMOND=6;//菱形渐变
+    const GRADIEN_DIR_VERTICAL='vertical';//从上到下渐变
+    const GRADIEN_DIR_HORIZONTAL='horizontal';//从左到右渐变
+    const GRADIEN_DIR_ELLIPSE='ellipse';//椭圆渐变
+    const GRADIEN_DIR_CIRCLE='circle';//圆形渐变
+    const GRADIEN_DIR_RECTANGLE='rectangle';//矩形渐变
+    const GRADIEN_DIR_DIAMOND='diamond';//菱形渐变
 
     private $options = [];
     public function setLogo($logoUrl){

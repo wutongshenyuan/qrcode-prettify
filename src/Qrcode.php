@@ -83,10 +83,11 @@ class Qrcode
         imagepng($QR, $filepath);
 		imagedestroy($QR);
         $base64Img = base64_encode(file_get_contents($filepath));
-        @unlink($filepath);
+       // @unlink($filepath);
+        self::emptyTempDir();
         return $base64Img;
     }
-	private static function getFilePath(){
+	public static function getFilePath(){
 		$baseDir = __DIR__.'/temp/';
         if(!is_dir($baseDir)){
             mkdir($baseDir,0777,true);
@@ -95,4 +96,14 @@ class Qrcode
         $filepath = $baseDir.$filename;
 		return $filepath;
 	}
+    public static function emptyTempDir(){
+        $baseDir = __DIR__.'/temp/';
+        $fileArr = scandir($baseDir);
+        foreach ($fileArr as $value){
+            if($value!='.' && $value!='..'){
+                var_dump($value);
+               // @unlink($baseDir.$value);
+            }
+        }
+    }
 }
