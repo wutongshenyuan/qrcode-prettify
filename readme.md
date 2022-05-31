@@ -42,4 +42,11 @@ RADIUS_LEVEL_x 用来控制圆弧半径的大小，分为十个等级，
 RADIUS_LEVEL_x，同理也是用来控制液化程度的
 `$opt->setLiquidRadius(QrcodeOptions::RADIUS_LEVEL_10);`
 
+## 渐变色二维码
+``` 
+$opt->setGradientForegroundColor(new RGBA(247, 17, 5,0),new RGBA(3, 142, 234,0),QrcodeOptions::GRADIEN_DIR_VERTICAL);//水平渐变
+$opt->setGradientForegroundColor(new RGBA(247, 17, 5,0),new RGBA(3, 142, 234,0),QrcodeOptions::GRADIEN_DIR_HORIZONTAL);// 垂直渐变
+$opt->setGradientForegroundColor(new RGBA(247, 17, 5,0),new RGBA(3, 142, 234,0),QrcodeOptions::GRADIEN_DIR_DIAGONAL);//对角线渐变
+```
+
 当然，各种效果是可以组合使用的

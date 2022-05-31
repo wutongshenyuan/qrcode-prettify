@@ -101,8 +101,8 @@ class Qrcode
         $fileArr = scandir($baseDir);
         foreach ($fileArr as $value){
             if($value!='.' && $value!='..'){
-                var_dump($value);
-               // @unlink($baseDir.$value);
+                //var_dump($value);
+               @unlink($baseDir.$value);
             }
         }
     }

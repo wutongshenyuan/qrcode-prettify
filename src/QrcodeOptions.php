@@ -28,6 +28,7 @@ class QrcodeOptions
     const GRADIEN_DIR_CIRCLE='circle';//圆形渐变
     const GRADIEN_DIR_RECTANGLE='rectangle';//矩形渐变
     const GRADIEN_DIR_DIAMOND='diamond';//菱形渐变
+    const GRADIEN_DIR_DIAGONAL='diagonal';//对角线渐变
 
     private $options = [];
     public function setLogo($logoUrl){
